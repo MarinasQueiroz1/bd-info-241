@@ -1,0 +1,86 @@
+import sqlite3
+
+conn = sqlite3.connect("tasks.db")
+cursor = conn.cursor()
+
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS tasks (
+        id INTEGER PRIMARY KEY,
+        description TEXT,
+        completed INTEGER
+    );
+""") 
+
+
+def create_task(description):
+    cursor.execute("INSERT INTO tasks (description, completed) VALUES (?, 0)", (description,))
+    conn.commit()
+
+
+
+def list_tasks():
+    cursor.execute("SELECT id, description, completed FROM tasks")
+    tasks = cursor.fetchall()
+    for task in tasks:
+        print(f"ID: {task[0]}, Description: {task[1]}, Completed: {'Yes' if task[2] else 'No'}")
+
+
+
+
+def mark_completed(task_id):
+    cursor.execute("UPDATE tasks SET completed = 1 WHERE id = ?", (task_id,))
+    conn.commit()
+
+
+
+
+
+def delete_task(task_id):
+    cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+    conn.commit()
+
+
+
+
+
+def update_task(task_id, description):
+    cursor.execute("UPDATE tasks SET description = ? WHERE id = ?", (description, task_id))
+    conn.commit()
+
+
+
+while True:
+    print("\nMenu:")
+    print("1. Criar tarefa")
+    print("2. Listar tarefas")
+    print("3. Marcar tarefa como concluída")
+    print("4. Excluir tarefa")
+    print("5. Atualizar tarefa")
+    print("6. Sair")
+
+    escolha = input("Escolha uma opção: ")
+
+    if escolha == "1":
+        description = input("Digite a descrição da tarefa: ")
+        create_task(description)
+    elif escolha == "2":
+        list_tasks()
+    elif escolha == "3":
+        task_id = int(input("Digite o ID da tarefa: "))
+        mark_completed(task_id)
+    elif escolha == "4":
+        task_id = int(input("Digite o ID da tarefa: "))
+        delete_task(task_id)
+    elif escolha == "5":
+        task_id = int(input("Digite o ID da tarefa: "))
+        description = input("Digite a nova descrição da tarefa: ")
+        update_task(task_id, description)
+    elif escolha == "6":
+        break
+    else:
+        print("Opção inválida. Tente novamente.")
+
+
+
+
+conn.close()
